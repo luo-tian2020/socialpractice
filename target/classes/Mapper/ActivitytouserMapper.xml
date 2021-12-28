@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luotian.Mapper.ActivitytouserMapper">
+    <resultMap id="ProgressMap" type="java.util.Map">
+        <result column="activityid" property="activityid" />
+        <result column="activitytitle" property="activitytitle" />
+        <result column="mode" property="mode" />
+    </resultMap>
+
+    <select id="findAllActivitytoUser" resultType="com.luotian.Entity.Activitytouser">
+     select * from activitytouser
+    </select>
+    <select id="findPartActivitytoUser" resultType="com.luotian.Entity.Activitytouser" parameterType="String">
+        select * from activitytouser where studentid=#{studentid}
+    </select>
+    <select id="findOneActivitytoUser"  resultType="com.luotian.Entity.Activitytouser">
+        select * from activitytouser where activityid=#{arg0} and studentid=#{arg1}
+    </select>
+    <select id="findActivitytoUserPart" parameterType="String" resultType="com.luotian.Entity.Activitytouser">
+        select * from activitytouser where activityid=#{activityid}
+    </select>
+    <insert id="addActivitytoUser" parameterType="com.luotian.Entity.Activitytouser">
+        insert into activitytouser(activityid,studentid,mode) values (#{activityid},#{studentid},#{mode})
+    </insert>
+    <delete id="deleteActivitytoUser">
+        delete from activitytouser where activityid=#{arg0} and studentid=#{arg1}
+    </delete>
+    <update id="updateActivitytoUser" parameterType="com.luotian.Entity.Activitytouser">
+        update activitytouser
+<set>
+    <if test="mode!=null and mode!=''">
+        mode=#{mode},
+    </if>
+</set>
+            where activityid=#{activityid} and studentid=#{studentid}
+    </update>
+<!--    查询进度-->
+    <select id="findProgressActivity" parameterType="String" resultMap="ProgressMap">
+            select activitytouser.activityid as activityid,activitytitle,mode from activitytouser,activity where activity.activityid=activitytouser.activityid and activitytouser.studentid=#{id}
+    </select>
+    <delete id="deleteActivitytouserByTeacher" parameterType="String">
+delete from activitytouser where activityid=#{activityid}
+    </delete>
+    <delete id="deleteStudent" parameterType="String">
+        delete from activitytouser where studentid=#{id}
+    </delete>
+</mapper>
+
+

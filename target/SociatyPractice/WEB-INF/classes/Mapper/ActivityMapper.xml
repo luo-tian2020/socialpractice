@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luotian.Mapper.ActivityMapper">
+<!--    activityid,activitytitle,activitydetail,persons,leaveperson,username,activity.staffid as staffid-->
+    <resultMap id="notAttendActivity" type="java.util.Map">
+        <result column="activityid" property="activityid" />
+        <result column="activitytitle" property="activitytitle" />
+        <result column="activitydetail" property="activitydetail" />
+        <result column="persons" property="persons" />
+        <result column="leaveperson" property="leaveperson" />
+        <result column="username" property="username" />
+        <result column="staffid" property="staffid" />
+    </resultMap>
+    <resultMap id="userToActivityMap" type="java.util.Map">
+        <result column="activityid" property="activityid" />
+        <result column="staffid" property="staffid" />
+        <result column="activitydetail" property="activitydetail" />
+        <result column="activitytitle" property="activitytitle" />
+        <result column="starttime" property="starttime" />
+        <result column="endtime" property="endtime" />
+        <result column="persons" property="persons" />
+        <result column="isfull" property="isfull" />
+        <result column="leaveperson" property="leaveperson" />
+        <result column="counts" property="counts" />
+    </resultMap>
+    <resultMap id="activityusers" type="java.util.Map">
+        <result column="name" property="name" />
+        <result column="value" property="value" />
+    </resultMap>
+    <resultMap id="activityersonsMap" type="java.util.Map">
+        <result column="username" property="username" />
+        <result column="id" property="id" />
+        <result column="staffid" property="staffid" />
+        <result column="phone" property="phone" />
+        <result column="activityid" property="activityid" />
+        <result column="mode" property="mode" />
+        <result column="counts" property="counts" />
+    </resultMap>
+
+<!--   <resultMap id="notAttendActivity" type="com.luotian.Entity.Activity">-->
+<!--       <id column="activityid" property="activityid" />-->
+<!--               <result column="activitytitle" property="activitytitle" />-->
+<!--               <result column="activitydetail" property="persons" />-->
+<!--               <result column="persons" property="persons" />-->
+<!--               <result column="leaveperson" property="leaveperson" />-->
+<!--       <association property="user" column="user" >-->
+<!--           <result column="staffid" property="staffid" />-->
+<!--           <result column="username" property="username" />-->
+<!--       </association>-->
+<!--   </resultMap>-->
+
+
+    <select id="findOneActivity" parameterType="String"  resultType="com.luotian.Entity.Activity">
+    select * from activity where activityid=#{activityid}
+    </select>
+    <insert id="addActivity" parameterType="com.luotian.Entity.Activity">
+        insert into activity(activityid,staffid,activitydetail,activitytitle,persons,isfull,starttime,endtime,leaveperson) values (#{activityid},#{staffid},#{activitydetail},#{activitytitle},#{persons},#{isfull},#{starttime},#{endtime},#{leaveperson})
+    </insert>
+    <delete id="deleteActivity" parameterType="String">
+        delete from activity where activityid=#{activityid}
+    </delete>
+    <update id="updateActivity" parameterType="com.luotian.Entity.Activity">
+        update activity
+<set>
+    <if test="staffid!=null  and staffid !=''">
+        staffid=#{staffid},
+    </if>
+    <if test="activitydetail!=null  and activitydetail !=''">
+        activitydetail=#{activitydetail},
+    </if>
+    <if test="activitytitle!=null  and activitytitle !=''">
+        activitytitle=#{activitytitle},
+    </if>
+    <if test="persons!=null  and persons !=0">
+        persons=#{persons},
+    </if>
+    <if test="isfull==0  or isfull ==1">
+        isfull=#{isfull},
+    </if>
+    <if test="starttime!=null  and starttime !=''">
+        starttime=#{starttime},
+    </if>
+    <if test="endtime!=null  and endtime !=''">
+        endtime=#{endtime},
+    </if>
+    <if test="leaveperson!=null">
+        leaveperson=#{leaveperson},
+    </if>
+</set>
+       where activityid=#{activityid}
+
+    </update>
+
+    <select id="findUserActivity" parameterType="String" resultType="com.luotian.Entity.Activity">
+        select * from activity where staffid=#{staffid}
+    </select>
+    <select id="findAllActivity" resultType="com.luotian.Entity.Activity">
+        select * from activity
+    </select>
+<!--    学生未参加的活动和老师信息-->
+    <select id="findNotAttendedActicity" parameterType="String" resultMap="notAttendActivity">
+        select activityid,activitytitle,activitydetail,persons,leaveperson,username,activity.staffid as staffid from activity,`user` where  activity.staffid=`user`.id and activity.activityid not in (select activityid from activitytouser where studentid=#{id});
+        </select>
+<!--    学生参加的活动和老师信息-->
+<select id="findAttendedActivity" parameterType="String" resultMap="notAttendActivity">
+    select activityid,activitytitle,activitydetail,persons,leaveperson,username,activity.staffid as staffid from activity,`user` where  activity.staffid=`user`.id and activity.activityid  in (select activityid from activitytouser where studentid=#{id});
+</select>
+<select id="findActivityIsFull" parameterType="int" resultType="com.luotian.Entity.Activity">
+    SELECT * FROM `activity` where isfull=#{isfull};
+</select>
+    <select id="findActivitytoUser" resultMap="userToActivityMap">
+        select activity.activityid,activity.staffid,activity.activitydetail,activity.activitytitle,activity.starttime,activity.endtime,activity.persons,activity.isfull,activity.leaveperson,(select COUNT(*) from activitytouser where activity.activityid=activitytouser.activityid) as counts
+        from activity
+    </select>
+    <select id="findActivityusers" resultMap="activityusers">
+        select activity.activitytitle as name,(select COUNT(*) from activitytouser where activity.activityid=activitytouser.activityid) as value
+        from activity
+    </select>
+    <select id="findActivityPersonsdetail" resultMap="activityersonsMap" parameterType="String">
+        select  `user`.username,`user`.id,`user`.staffid,`user`.phone ,activitytouser.activityid,activitytouser.`mode`,
+               (select count(isread) from progressinfo where progressinfo.id=`user`.id and progressinfo.activityid=activitytouser.activityid and progressinfo.isread=0) as counts
+        from activitytouser,`user`
+        where activitytouser.activityid=#{activityid}  and
+            `user`.id=activitytouser.studentid ;
+    </select>
+    <update id="updateaddleaveperson" parameterType="String">
+    update activity set leaveperson=leaveperson+1 where activityid=#{activityid};
+    </update>
+
+    <update  id="updateStaffidBymanage">
+        update activity set staffid=#{teacherid} where staffid=#{staffid};
+    </update>
+</mapper>
+

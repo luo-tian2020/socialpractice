@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luotian.Mapper.ProgressinfoMapper">
+    <resultMap id="userProgressMap" type="java.util.Map">
+        <result column="id" property="id"></result>
+        <result column="activityid" property="activityid"></result>
+        <result column="proinfo" property="proinfo"></result>
+        <result column="protime" property="protime"></result>
+        <result column="username" property="username"></result>
+        <result column="staffid" property="staffid"></result>
+        <result column="mode" property="mode"></result>
+        <result column="proid" property="proid"></result>
+    </resultMap>
+
+   <insert parameterType="com.luotian.Entity.Progressinfo" id="addProgressinfo">
+       insert into progressinfo(id,activityid,teacherid,proinfo,protime,isread,proid)
+       values(#{id},#{activityid},#{teacherid},#{proinfo},#{protime},#{isread},#{proid})
+   </insert>
+    <delete id="deleteProgressinfo">
+        delete from progressinfo where id=#{id} and activityid=#{activityid}
+    </delete>
+    <update id="updateProgressinfo" parameterType="com.luotian.Entity.Progressinfo">
+        update progressinfo
+<set>
+    <if test="teacherid!='' and teacherid!=null">
+        teacherid=#{teacherid},
+    </if>
+    <if test="proinfo!='' and proinfo!=null">
+         proinfo=#{proinfo},
+    </if>
+    <if test="protime!='' and protime!=null">
+        protime=#{protime},
+    </if>
+    <if test="isread!=null">
+       isread=#{isread},
+    </if>
+</set>
+            where proid=#{proid}
+    </update>
+    <select id="findOneProgressinfo"  resultType="com.luotian.Entity.Progressinfo">
+        select * from progressinfo
+        where id=#{id} and activityid=#{activityid};
+    </select>
+    <select id="findpersonProgress" resultMap="userProgressMap">
+        select progressinfo.id,progressinfo.activityid,progressinfo.proinfo,progressinfo.protime,`user`.username,`user`.staffid,activitytouser.`mode`,progressinfo.proid
+        from `user`,progressinfo,activitytouser
+        where  `user`.id=progressinfo.id and
+            progressinfo.id=#{id} and
+            progressinfo.activityid=#{activityid} and
+            progressinfo.isread=#{isread}  and
+            activitytouser.activityid=progressinfo.activityid and
+            activitytouser.studentid=`user`.id
+        ORDER BY progressinfo.protime desc;
+    </select>
+    <delete id="deleteProgressinfoByTeacher" parameterType="String">
+        delete from progressinfo where activityid=#{activityid}
+    </delete>
+    <delete id="deleteStudentProgress" parameterType="String">
+ delete from progressinfo where id=#{id}
+ </delete>
+    <update id="updateTeacherByManage">
+        update progressinfo set  teacherid=#{teacherid} where teacherid=#{staffid};
+    </update>
+</mapper>
+

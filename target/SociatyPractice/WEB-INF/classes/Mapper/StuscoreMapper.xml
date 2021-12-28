@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luotian.Mapper.StuscoreMapper">
+    <resultMap id="activityMap" type="java.util.Map">
+        <result column="activityid" property="activityid"/>
+        <result column="score" property="score"/>
+        <result column="activitytitle" property="activitytitle"/>
+    </resultMap>
+    <select id="findOneStuscore" resultType="com.luotian.Entity.Stuscore">
+select * from stuscore where activityid=#{arg0} and studentid=#{arg1}
+    </select>
+    <select id="findUserStuscore" parameterType="String" resultType="com.luotian.Entity.Stuscore">
+        select * from stuscore where studentid=#{studentid}
+    </select>
+    <select id="findActivityStuscore" parameterType="String" resultType="com.luotian.Entity.Stuscore">
+        select * from stuscore where activityid=#{activityid}
+    </select>
+    <select id="findAllscore" resultType="com.luotian.Entity.Stuscore">
+        select * from stuscore
+    </select>
+    <insert id="addStuscore" parameterType="com.luotian.Entity.Stuscore">
+        insert into stuscore(activityid,studentid,score) values (#{activityid},#{studentid},#{score})
+    </insert>
+    <delete id="deleteStuscore">
+        delete from stuscore where activityid=#{arg0} and studentid=#{arg1}
+    </delete>
+    <update id="updateStuscore" parameterType="com.luotian.Entity.Stuscore">
+        update stuscore
+<set>
+    <if test="score!=0 and score !=null">
+        score=#{score},
+    </if>
+</set>
+            where activityid=#{activityid} and studentid=#{studentid}
+    </update>
+    <select id="findScoreStudent" parameterType="String" resultMap="activityMap">
+        select stuscore.activityid as activityid,score,activitytitle
+        from activity,stuscore
+        where
+            stuscore.activityid=activity.activityid and stuscore.studentid=#{id};
+
+    </select>
+    <delete id="deleteStuscoreByTeacher" parameterType="String">
+        delete from stuscore where activityid=#{activityid}
+    </delete>
+    <delete id="deleteStudentScore" parameterType="String">
+        delete from stuscore where studentid=#{id}
+    </delete>
+</mapper>
+

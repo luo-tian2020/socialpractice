@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.luotian.Mapper.TeacherscoreMapper">
+    <resultMap id="WillGetScoreMap" type="java.util.Map">
+        <result column="activityid" property="activityid" />
+        <result column="activitytitle" property="activitytitle" />
+        <result column="username" property="username" />
+        <result column="studentid" property="studentid" />
+        <result column="staffid" property="staffid" />
+        <result column="score" property="score" />
+    </resultMap>
+    <select id="findAllTeacherscore" resultType="com.luotian.Entity.Teacherscore">
+select * from teacherscore;
+    </select>
+    <select id="findteacherTeacherscore" parameterType="String" resultType="com.luotian.Entity.Teacherscore">
+        select * from teacherscore where staffid=#{staffid}
+    </select>
+    <select id="findstudentTeacherscore" parameterType="String" resultType="com.luotian.Entity.Teacherscore">
+        select * from teacherscore where studentid=#{studentid}
+    </select>
+    <select id=" findactivityTeacherscore" parameterType="String" resultType="com.luotian.Entity.Teacherscore">
+        select * from teacherscore where activityid=#{activityid}
+    </select>
+    <select id="findOneTeacherscore" resultType="com.luotian.Entity.Teacherscore">
+        select * from teacherscore where activityid=#{arg0} and studentid=#{arg1}
+    </select>
+    <insert id="addTeacherscore" parameterType="com.luotian.Entity.Teacherscore">
+        insert into teacherscore(activityid,studentid,staffid,score) values(#{activityid},#{studentid},#{staffid},#{score})
+    </insert>
+    <delete id="deleteTeacherscore" >
+        delete from teacherscore where activityid=#{arg0} and studentid=#{arg1}
+    </delete>
+    <update id="updateTeacherscore" parameterType="com.luotian.Entity.Teacherscore">
+update teacherscore
+<set>
+    <if test="staffid!=null and staffid!=''">
+        staffid=#{staffid},
+    </if>
+    <if test="score>=0 and score!=null">
+        score=#{score},
+    </if>
+</set>
+    where activityid=#{activityid} and studentid=#{studentid}
+    </update>
+<!--    老师对学生评分-->
+    <select id="findWillGetScore" parameterType="String" resultMap="WillGetScoreMap">
+        select DISTINCT activity.activityid,activity.activitytitle,`user`.username,activitytouser.studentid,`user`.staffid,stuscore.score
+        from activity,activitytouser,`user`,stuscore
+        where activitytouser.activityid=activity.activityid and
+            activity.staffid=#{id}and
+            activitytouser.studentid=`user`.id
+          and activity.activityid=#{activityid}
+          and stuscore.activityid=#{activityid}
+          and activitytouser.studentid=stuscore.studentid;</select>
+    <delete id="deleteTeacherscoreByTeacher" parameterType="String">
+        delete from teacherscore where activityid=#{activityid}
+    </delete>
+    <delete id="deleteStudentTeacherscore" parameterType="String">
+        delete from teacherscore where studentid=#{id}
+    </delete>
+</mapper>
+
